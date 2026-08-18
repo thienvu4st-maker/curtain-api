@@ -18,8 +18,13 @@ public class Product
     [MaxLength(1000)]
     public string Description { get; set; } = string.Empty;
 
-    [MaxLength(100)]
-    public string Category { get; set; } = string.Empty;
+    [MaxLength(500)]
+    public string ImageUrl { get; set; } = string.Empty;
 
-    public DateTime CreatedAt { get; set; }
+    public int? CategoryId { get; set; }
+
+    [ForeignKey("CategoryId")]
+    public Category? Category { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
