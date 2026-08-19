@@ -52,16 +52,16 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
-// CORS: Allow Flutter app (Chrome, Android emulator, Windows desktop)
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFlutter", policy =>
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader());
-});
+// Enable Global CORS for Flutter Web, Android, iOS
+builder.Services.AddCors();
 
 var app = builder.Build();
+
+// Global CORS Middleware - Must be placed FIRST before Auth
+app.UseCors(policy =>
+    policy.AllowAnyOrigin()
+          .AllowAnyMethod()
+          .AllowAnyHeader());
 
 // Auto-create database & tables on Supabase PostgreSQL if they don't exist
 using (var scope = app.Services.CreateScope())
@@ -70,9 +70,6 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-// --- Middleware Order ---
-app.UseRouting();
-app.UseCors("AllowFlutter");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
