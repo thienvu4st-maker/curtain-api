@@ -12,6 +12,8 @@ namespace media_app_api.Controllers;
 [Route("api/[controller]")]
 public class CategoriesController(ICategoryService categoryService) : ControllerBase
 {
+    // Public GET endpoint for Customer Web & Guests
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -19,6 +21,8 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         return Ok(categories);
     }
 
+    // Public GET endpoint for Customer Web & Guests
+    [AllowAnonymous]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {

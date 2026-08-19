@@ -10,6 +10,8 @@ namespace media_app_api.Controllers;
 [Route("api/[controller]")]
 public class ProductsController(IProductService productService) : ControllerBase
 {
+    // Public GET endpoint for Customer Web & Guests
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int? categoryId)
     {
@@ -17,6 +19,8 @@ public class ProductsController(IProductService productService) : ControllerBase
         return Ok(products);
     }
 
+    // Public GET endpoint for Customer Web & Guests
+    [AllowAnonymous]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
