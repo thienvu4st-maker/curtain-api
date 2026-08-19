@@ -1,3 +1,4 @@
+# Build v2 with Categories feature
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 COPY ["media_app_api.csproj", "./"]
