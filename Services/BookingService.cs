@@ -7,13 +7,29 @@ namespace media_app_api.Services;
 
 public class BookingService(AppDbContext dbContext) : IBookingService
 {
-    public async Task<IEnumerable<BookingDto>> GetAllBookingsAsync()
+    public async Task<PagedBookingResultDto> GetBookingsPagedAsync(string? status = null, int pageIndex = 1, int pageSize = 10)
     {
-        var bookings = await dbContext.Bookings
+        if (pageIndex < 1) pageIndex = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100;
+
+        var query = dbContext.Bookings.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status) && !status.Equals("all", StringComparison.OrdinalIgnoreCase))
+        {
+            query = query.Where(b => b.Status.ToLower() == status.ToLower());
+        }
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var bookings = await query
             .OrderByDescending(b => b.CreatedAt)
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
 
-        return bookings.Select(b => new BookingDto(
+        var items = bookings.Select(b => new BookingDto(
             b.Id,
             b.CustomerName,
             b.PhoneNumber,
@@ -23,6 +39,14 @@ public class BookingService(AppDbContext dbContext) : IBookingService
             b.Status,
             b.CreatedAt
         ));
+
+        return new PagedBookingResultDto(
+            items,
+            totalCount,
+            pageIndex,
+            pageSize,
+            totalPages
+        );
     }
 
     public async Task<BookingDto?> GetBookingByIdAsync(int id)

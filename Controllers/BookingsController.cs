@@ -11,10 +11,13 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
 {
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? status,
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10)
     {
-        var bookings = await bookingService.GetAllBookingsAsync();
-        return Ok(bookings);
+        var result = await bookingService.GetBookingsPagedAsync(status, pageIndex, pageSize);
+        return Ok(result);
     }
 
     [Authorize]

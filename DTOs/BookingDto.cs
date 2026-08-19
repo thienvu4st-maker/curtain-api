@@ -22,3 +22,11 @@ public record CreateBookingDto(
 public record UpdateBookingStatusDto(
     string Status
 );
+
+public record PagedBookingResultDto(
+    IEnumerable<BookingDto> Items,
+    int TotalCount,
+    int PageIndex,
+    int PageSize,
+    int TotalPages
+);
