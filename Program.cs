@@ -88,7 +88,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-// --- 5. Database Schema Auto-Migration & Sequence Sync ---
+// --- 5. Database Schema Auto-Migration & Legacy Column Fix ---
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -106,6 +106,18 @@ using (var scope = app.Services.CreateScope())
 
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""CategoryId"" integer;
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" character varying(500) DEFAULT '';
+
+        -- Drop NOT NULL constraint on legacy 'Category' column if present
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 
+                FROM information_schema.columns 
+                WHERE table_name = 'Products' AND column_name = 'Category'
+            ) THEN
+                ALTER TABLE ""Products"" ALTER COLUMN ""Category"" DROP NOT NULL;
+            END IF;
+        END $$;
 
         -- Synchronize PostgreSQL IDENTITY Sequences
         SELECT setval(pg_get_serial_sequence('""Products""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Products"";
