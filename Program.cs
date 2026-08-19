@@ -9,7 +9,6 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 // --- Services ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -23,7 +22,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         options.UseSqlServer(connectionString);
     }
 });
-
 
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -47,7 +45,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "MediaAppApi",
         ValidAudience = builder.Configuration["Jwt:Audience"] ?? "MediaAppClient",
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-        ClockSkew = TimeSpan.Zero // Remove default 5 minute clock skew
+        ClockSkew = TimeSpan.Zero
     };
 });
 
@@ -72,11 +70,11 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-// --- Middleware ---
+// --- Middleware Order ---
+app.UseRouting();
 app.UseCors("AllowFlutter");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-

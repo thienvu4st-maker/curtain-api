@@ -1,10 +1,12 @@
 using media_app_api.DTOs;
 using media_app_api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace media_app_api.Controllers;
 
+[EnableCors("AllowFlutter")]
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController(IAuthService authService) : ControllerBase

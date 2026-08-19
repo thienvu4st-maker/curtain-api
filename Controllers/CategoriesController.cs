@@ -1,11 +1,13 @@
 using media_app_api.DTOs;
 using media_app_api.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace media_app_api.Controllers;
 
 [Authorize]
+[EnableCors("AllowFlutter")]
 [ApiController]
 [Route("api/[controller]")]
 public class CategoriesController(ICategoryService categoryService) : ControllerBase
