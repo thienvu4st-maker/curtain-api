@@ -52,16 +52,19 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
-// Enable Global CORS for Flutter Web, Android, iOS
-builder.Services.AddCors();
+// Configure CORS policy with dynamic origin matching for Flutter Web & credentials
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFlutter", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => true)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
-
-// Global CORS Middleware - Must be placed FIRST before Auth
-app.UseCors(policy =>
-    policy.AllowAnyOrigin()
-          .AllowAnyMethod()
-          .AllowAnyHeader());
 
 // Auto-create database & tables on Supabase PostgreSQL if they don't exist
 using (var scope = app.Services.CreateScope())
@@ -69,6 +72,10 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.EnsureCreated();
 }
+
+// Middleware Order: Routing -> CORS -> Auth -> Controllers
+app.UseRouting();
+app.UseCors("AllowFlutter");
 
 app.UseAuthentication();
 app.UseAuthorization();
