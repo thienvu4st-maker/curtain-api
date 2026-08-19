@@ -5,13 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace media_app_api.Controllers;
 
-[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProductsController(IProductService productService) : ControllerBase
 {
     // Public GET endpoint for Customer Web & Guests
-    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int? categoryId)
     {
@@ -20,7 +18,6 @@ public class ProductsController(IProductService productService) : ControllerBase
     }
 
     // Public GET endpoint for Customer Web & Guests
-    [AllowAnonymous]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -32,6 +29,7 @@ public class ProductsController(IProductService productService) : ControllerBase
         return Ok(product);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateProductDto request)
     {
@@ -39,6 +37,7 @@ public class ProductsController(IProductService productService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
     }
 
+    [Authorize]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto request)
     {
@@ -49,6 +48,7 @@ public class ProductsController(IProductService productService) : ControllerBase
         return Ok(product);
     }
 
+    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

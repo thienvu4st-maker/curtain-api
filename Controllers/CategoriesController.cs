@@ -6,14 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace media_app_api.Controllers;
 
-[Authorize]
 [EnableCors("AllowFlutter")]
 [ApiController]
 [Route("api/[controller]")]
 public class CategoriesController(ICategoryService categoryService) : ControllerBase
 {
     // Public GET endpoint for Customer Web & Guests
-    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -22,7 +20,6 @@ public class CategoriesController(ICategoryService categoryService) : Controller
     }
 
     // Public GET endpoint for Customer Web & Guests
-    [AllowAnonymous]
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -33,6 +30,7 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         return Ok(category);
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateCategoryDto request)
     {
@@ -40,6 +38,7 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
     }
 
+    [Authorize]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDto request)
     {
@@ -50,6 +49,7 @@ public class CategoriesController(ICategoryService categoryService) : Controller
         return Ok(category);
     }
 
+    [Authorize]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
