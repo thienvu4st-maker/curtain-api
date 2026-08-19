@@ -67,7 +67,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// --- 4. Global Exception Handler Middleware (Clear 500 error reporting) ---
+// --- 4. Global Exception Handler Middleware ---
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -88,7 +88,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-// --- 5. Database Schema Auto-Migration & Sequence Reset ---
+// --- 5. Database Schema Auto-Migration & Sequence Sync ---
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -107,15 +107,7 @@ using (var scope = app.Services.CreateScope())
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""CategoryId"" integer;
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" character varying(500) DEFAULT '';
 
-        INSERT INTO ""Categories"" (""Id"", ""Name"", ""Description"", ""IconName"", ""CreatedAt"")
-        VALUES 
-            (1, 'Rèm Vải', 'Rèm vải gấm, lụa, voan chống nắng 100%', 'curtain', NOW()),
-            (2, 'Rèm Cuốn', 'Rèm cuốn văn phòng chống nắng', 'blinds', NOW()),
-            (3, 'Rèm Gỗ', 'Rèm sáo gỗ tự nhiên cao cấp', 'wooden_blinds', NOW()),
-            (4, 'Rèm Cầu Vồng', 'Rèm cầu vồng Hàn Quốc 2 lớp', 'rainbow_blinds', NOW())
-        ON CONFLICT (""Id"") DO NOTHING;
-
-        -- Fix PostgreSQL IDENTITY Sequences out of sync after manual row inserts
+        -- Synchronize PostgreSQL IDENTITY Sequences
         SELECT setval(pg_get_serial_sequence('""Products""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Products"";
         SELECT setval(pg_get_serial_sequence('""Categories""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Categories"";
     ";
