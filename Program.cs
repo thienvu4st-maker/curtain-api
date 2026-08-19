@@ -2,6 +2,7 @@ using System.Text;
 using media_app_api.Data;
 using media_app_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -66,7 +67,28 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// --- 4. Database Schema Auto-Migration ---
+// --- 4. Global Exception Handler Middleware (Clear 500 error reporting) ---
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var ex = exceptionHandlerPathFeature?.Error;
+
+        var result = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            message = ex?.Message ?? "Internal Server Error",
+            innerError = ex?.InnerException?.Message
+        });
+
+        await context.Response.WriteAsync(result);
+    });
+});
+
+// --- 5. Database Schema Auto-Migration & Sequence Reset ---
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -92,6 +114,10 @@ using (var scope = app.Services.CreateScope())
             (3, 'Rèm Gỗ', 'Rèm sáo gỗ tự nhiên cao cấp', 'wooden_blinds', NOW()),
             (4, 'Rèm Cầu Vồng', 'Rèm cầu vồng Hàn Quốc 2 lớp', 'rainbow_blinds', NOW())
         ON CONFLICT (""Id"") DO NOTHING;
+
+        -- Fix PostgreSQL IDENTITY Sequences out of sync after manual row inserts
+        SELECT setval(pg_get_serial_sequence('""Products""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Products"";
+        SELECT setval(pg_get_serial_sequence('""Categories""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Categories"";
     ";
 
     try
@@ -104,7 +130,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// --- 5. Clean Middleware Pipeline ---
+// --- 6. Clean Middleware Pipeline ---
 app.UseRouting();
 app.UseCors("AllowFlutter");
 app.UseAuthentication();
