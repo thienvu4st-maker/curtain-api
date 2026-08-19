@@ -1,13 +1,11 @@
 using media_app_api.DTOs;
 using media_app_api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace media_app_api.Controllers;
 
 [Authorize]
-[EnableCors("AllowFlutter")]
 [ApiController]
 [Route("api/[controller]")]
 public class ProductsController(IProductService productService) : ControllerBase
@@ -35,5 +33,25 @@ public class ProductsController(IProductService productService) : ControllerBase
     {
         var product = await productService.CreateProductAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+    }
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDto request)
+    {
+        var product = await productService.UpdateProductAsync(id, request);
+        if (product is null)
+            return NotFound(new { message = $"Product with id {id} not found." });
+
+        return Ok(product);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var success = await productService.DeleteProductAsync(id);
+        if (!success)
+            return NotFound(new { message = $"Product with id {id} not found." });
+
+        return NoContent();
     }
 }

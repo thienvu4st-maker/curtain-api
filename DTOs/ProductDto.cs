@@ -17,3 +17,11 @@ public record CreateProductDto(
     string ImageUrl,
     int? CategoryId
 );
+
+public record UpdateProductDto(
+    string Title,
+    decimal Price,
+    string Description,
+    string ImageUrl,
+    int? CategoryId
+);
