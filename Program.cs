@@ -73,9 +73,33 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-// Middleware Order: Routing -> CORS -> Auth -> Controllers
+// Middleware Order: Routing -> CORS -> Preflight OPTIONS Interceptor -> Auth -> Controllers
 app.UseRouting();
 app.UseCors("AllowFlutter");
+
+// Intercept Preflight OPTIONS requests to bypass [Authorize] checks on authenticated routes
+app.Use(async (context, next) =>
+{
+    if (context.Request.Method == "OPTIONS")
+    {
+        var origin = context.Request.Headers["Origin"].ToString();
+        if (!string.IsNullOrEmpty(origin))
+        {
+            context.Response.Headers["Access-Control-Allow-Origin"] = origin;
+        }
+        else
+        {
+            context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+        }
+        context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+        context.Response.Headers["Access-Control-Allow-Methods"] = "*";
+        context.Response.Headers["Access-Control-Allow-Credentials"] = "true";
+        context.Response.StatusCode = 200;
+        await context.Response.CompleteAsync();
+        return;
+    }
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
