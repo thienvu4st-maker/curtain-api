@@ -95,7 +95,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-// --- 5. Non-Destructive Database Schema Migration & Seeding ---
+// --- 5. Pure DDL Schema Migration (CREATE TABLE IF NOT EXISTS Only) ---
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -156,54 +156,6 @@ using (var scope = app.Services.CreateScope())
         -- 5. Guarantee Columns exist
         ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""CategoryGroupId"" integer NULL;
         ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" integer NULL;
-
-        -- 6. Seed Category Groups (Chuyên Đề) ON CONFLICT DO NOTHING
-        INSERT INTO ""CategoryGroups"" (""Id"", ""Name"", ""Description"", ""IconName"")
-        VALUES 
-            (1, 'Rèm Cửa & Màn Cửa', 'Đầy đủ các loại rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ, rèm tổ ong, roman & rèm tự động', 'curtains'),
-            (2, 'Ốp Tường, Trần & Trang Trí', 'Đầy đủ tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường Hàn Quốc & gỗ nhựa ngoài trời', 'wall'),
-            (3, 'Dịch Vụ & Bảo Trì', 'Dịch vụ tháo lắp giặt hấp màn rèm tận nhà & sửa chữa thay thế phụ kiện rèm cửa', 'cleaning_services')
-        ON CONFLICT (""Id"") DO NOTHING;
-
-        -- 7. Seed Categories ON CONFLICT DO UPDATE
-        INSERT INTO ""Categories"" (""Id"", ""CategoryGroupId"", ""Name"", ""Description"", ""IconName"", ""CreatedAt"")
-        VALUES 
-            (10, 1, 'Rèm Vải 2 Lớp (Gấm & Voan)', 'Phối hợp giữa voan thêu mềm mại và vải gấm cản sáng 100% cho phòng khách & phòng ngủ.', 'curtain', NOW()),
-            (11, 1, 'Rèm Voan & Voan Thêu Tay', 'Voan trắng trơn, voan xước & voan thêu nghệ thuật nhẹ nhàng lãng mạn.', 'voan', NOW()),
-            (12, 1, 'Rèm Vải Tân Cổ Điển / Nữ Hoàng', 'Rèm vải may bèo nhún yếm sò quý phái cho biệt thự tân cổ điển.', 'royal', NOW()),
-            (13, 1, 'Rèm Cuốn Văn Phòng (Chống Nắng 100%)', 'Rèm cuốn trơn tráng bạc cản sáng cản nhiệt 100% cho văn phòng.', 'blinds', NOW()),
-            (14, 1, 'Rèm Cuốn Lưới & In Tranh 3D', 'Rèm cuốn lưới nhìn xuyên không gian & rèm cuốn in tranh 3D nghệ thuật.', 'blinds_mesh', NOW()),
-            (15, 1, 'Rèm Cầu Vồng Hàn Quốc (Modero/Combi)', 'Rèm cầu vồng nhập khẩu Hàn Quốc 2 lớp xoay lật điều chỉnh ánh sáng 180 độ.', 'rainbow', NOW()),
-            (16, 1, 'Rèm Sáo Gỗ & Rèm Sáo Nhôm', 'Rèm sáo gỗ sồi Nga tự nhiên bản 5cm & rèm sáo nhôm chống nước.', 'wooden', NOW()),
-            (17, 1, 'Rèm Tổ Ong & Vách Ngăn Tổ Ong', 'Rèm tổ ong cản nhiệt 100% & hệ vách ngăn tổ ong di động thông minh.', 'honeycomb', NOW()),
-            (18, 1, 'Rèm Roman Xếp Lớp', 'Rèm Roman may xếp lớp hiện đại tiết kiệm diện tích cho cửa sổ nhỏ.', 'roman', NOW()),
-            (19, 1, 'Rèm Lá Dọc Văn Phòng', 'Rèm lá dọc xoay lật 180 độ giá rẻ cản sáng hiệu quả cho văn phòng.', 'vertical', NOW()),
-            (20, 1, 'Rèm Tự Động Thông Minh', 'Động cơ rèm cửa tự động tích hợp điều khiển từ xa, remote & App Smarthome.', 'smart', NOW()),
-
-            (21, 2, 'Tấm Ốp Nhựa PVC Vân Đá Tráng Gương', 'Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương sáng bóng, chống ẩm mốc 100%.', 'pvc_wall', NOW()),
-            (22, 2, 'Tấm Ốp Lam Sóng Trang Trí Vách TV', 'Tấm ốp lam sóng nhựa PVC/PS cốt nguyên sinh E0 tạo điểm nhấn vách TV phòng khách.', 'lam_song', NOW()),
-            (23, 2, 'Tấm Ốp Nhựa Nano Vân Gỗ & Hoa Văn', 'Tấm ốp Nano phẳng hèm khóa giấu nẹp, vân gỗ tự nhiên & hoa văn trang trí trần tường.', 'nano_panel', NOW()),
-            (24, 2, 'Giấy Dán Tường Hàn Quốc & Tranh 3D', 'Giấy dán tường Hàn Quốc chính hãng & tranh dán tường 3D khổ lớn in theo kích thước.', 'wallpaper', NOW()),
-            (25, 2, 'Sàn Nhựa Hèm Khóa & Gỗ Nhựa Ngoài Trời', 'Sàn nhựa SPC hèm khóa 4mm-6mm & lam gỗ nhựa ngoài trời chịu mưa nắng.', 'outdoor_wood', NOW()),
-
-            (26, 3, 'Dịch Vụ Giặt Màn Rèm Tận Nhà', 'Tháo rèm tận nhà, mang về giặt hấp khử khuẩn và lắp lại hoàn chỉnh trong ngày.', 'curtain_wash', NOW()),
-            (27, 3, 'Sửa Chữa & Thay Phụ Kiện Rèm Cửa', 'Sửa rèm kẹt, thay thanh treo, dây kéo & phụ kiện màn rèm cũ.', 'repair', NOW())
-        ON CONFLICT (""Id"") DO UPDATE SET ""CategoryGroupId"" = EXCLUDED.""CategoryGroupId"";
-
-        -- 8. Seed Sample ECatalogs (Catalogue Điện Tử 2025-2026) ON CONFLICT DO NOTHING
-        INSERT INTO ""ECatalogs"" (""Id"", ""Title"", ""Description"", ""CoverImageUrl"", ""PdfUrl"", ""CategoryGroupId"", ""CategoryId"", ""PageCount"", ""CreatedAt"")
-        VALUES 
-            (1, 'SHIREN Interior Curtain Collection 2025 - 2026 (Vol 12)', 'Bộ sưu tập Catalogue mẫu vải rèm gấm cản sáng, voan thêu nghệ thuật nhập khẩu Nhật Bản & Châu Âu.', 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600', 'https://heyzine.com/flip-book/1a2b3c4d5e.html', 1, 10, 41, NOW()),
-            (2, 'MODERO Korea Luxury Blinds & Shades 2025', 'Catalogue điện tử chọn mẫu rèm cầu vồng, rèm cuốn tráng bạc & rèm tổ ong cao cấp Hàn Quốc.', 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600', 'https://heyzine.com/flip-book/modero-korea-2025.html', 1, 15, 68, NOW()),
-            (3, 'KOSMOS Tấm Ốp PVC Vân Đá & Lam Sóng 2025', 'Catalogue tổng hợp các mẫu tấm ốp PVC tráng gương vân đá cẩm thạch & lam sóng ốp vách TV.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', 'https://heyzine.com/flip-book/kosmos-pvc-2025.html', 2, 21, 52, NOW())
-        ON CONFLICT (""Id"") DO NOTHING;
-
-        -- 9. Synchronize Sequences safely
-        SELECT setval(pg_get_serial_sequence('""CategoryGroups""', 'Id'), coalesce(max(""Id""), 1)) FROM ""CategoryGroups"";
-        SELECT setval(pg_get_serial_sequence('""Categories""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Categories"";
-        SELECT setval(pg_get_serial_sequence('""Products""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Products"";
-        SELECT setval(pg_get_serial_sequence('""Bookings""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Bookings"";
-        SELECT setval(pg_get_serial_sequence('""ECatalogs""', 'Id'), coalesce(max(""Id""), 1)) FROM ""ECatalogs"";
     ";
 
     try
