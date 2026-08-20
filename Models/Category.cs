@@ -18,6 +18,9 @@ public class Category
     [MaxLength(100)]
     public string IconName { get; set; } = "curtain";
 
+    public int? CategoryGroupId { get; set; }
+    public CategoryGroup? CategoryGroup { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [JsonIgnore]
