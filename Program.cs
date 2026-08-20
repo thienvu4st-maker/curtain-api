@@ -131,48 +131,58 @@ using (var scope = app.Services.CreateScope())
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""CategoryId"" integer;
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" character varying(500) DEFAULT '';
 
-        -- CLEAR ALL LEGACY DATA FOR FRESH INDUSTRY RE-SEEDING
+        -- CLEAR ALL LEGACY DATA FOR FRESH COMPLETE INDUSTRY RE-SEEDING
         TRUNCATE TABLE ""Products"", ""Categories"", ""CategoryGroups"" RESTART IDENTITY CASCADE;
 
-        -- 1. Seed Official Category Groups (Chuyên Đề) from TheGioiRem & Kosmos
+        -- 1. Seed Official Category Groups (Chuyên Đề)
         INSERT INTO ""CategoryGroups"" (""Id"", ""Name"", ""Description"", ""IconName"")
         VALUES 
-            (1, 'Rèm Cửa & Màn Cửa', 'Các loại rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ & rèm tự động thông minh', 'curtains'),
-            (2, 'Ốp Tường, Trần & Trang Trí', 'Các loại tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường & gỗ nhựa ngoài trời', 'wall'),
-            (3, 'Dịch Vụ & Bảo Trì', 'Dịch vụ tháo lắp giặt hấp màn rèm tận nhà & sửa chữa phụ kiện rèm cửa', 'cleaning_services');
+            (1, 'Rèm Cửa & Màn Cửa', 'Đầy đủ các dòng rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ, rèm tổ ong, roman & rèm tự động', 'curtains'),
+            (2, 'Ốp Tường, Trần & Trang Trí', 'Đầy đủ tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường Hàn Quốc & gỗ nhựa ngoài trời', 'wall'),
+            (3, 'Dịch Vụ & Bảo Trì', 'Dịch vụ tháo lắp giặt hấp màn rèm tận nhà & sửa chữa thay thế phụ kiện rèm cửa', 'cleaning_services');
 
-        -- 2. Seed Official Industry Categories (Danh Mục Chi Tiết)
+        -- 2. Seed Full Deep Industry Categories (Chuyên Đề Rèm Cửa - Kosmos & TheGioiRem)
         INSERT INTO ""Categories"" (""Id"", ""CategoryGroupId"", ""Name"", ""Description"", ""IconName"", ""CreatedAt"")
         VALUES 
-            -- Chuyên Đề: Rèm Cửa & Màn Cửa (TheGioiRem)
-            (1, 1, 'Rèm Vải 2 Lớp', 'Rèm vải gấm, lụa, voan chống nắng 100% cho phòng khách & phòng ngủ', 'curtain', NOW()),
-            (2, 1, 'Rèm Cuốn Văn Phòng', 'Rèm cuốn trơn, rèm cuốn lưới chống nắng cách nhiệt hiện đại', 'blinds', NOW()),
-            (3, 1, 'Rèm Cầu Vồng Hàn Quốc', 'Rèm cầu vồng Hàn Quốc 2 lớp xoay lật điều chỉnh ánh sáng linh hoạt', 'rainbow_blinds', NOW()),
-            (4, 1, 'Rèm Gỗ & Rèm Sáo', 'Rèm sáo gỗ tự nhiên, rèm sáo nhôm cao cấp sang trọng', 'wooden_blinds', NOW()),
-            (5, 1, 'Rèm Tự Động Thông Minh', 'Động cơ rèm cửa điều khiển từ xa qua công tắc, remote & ứng dụng điện thoại', 'smart_curtain', NOW()),
+            -- --- CHUYÊN ĐỀ 1: RÈM CỬA & MÀN CỬA (TheGioiRem Full Taxonomy) ---
+            (1, 1, 'Rèm Vải 2 Lớp (Gấm & Voan)', 'Phối hợp giữa lớp voan thêu mềm mại và lớp gấm chống nắng 100% cho phòng khách & phòng ngủ.', 'curtain', NOW()),
+            (2, 1, 'Rèm Voan & Voan Thêu Tay', 'Rèm voan trắng trơn, voan xước & voan thêu nghệ thuật nhẹ nhàng lãng mạn.', 'voan', NOW()),
+            (3, 1, 'Rèm Vải Tân Cổ Điển / Nữ Hoàng', 'Rèm vải may phong cách tân cổ điển có yếm sò, bèo nhún sang trọng cho biệt thự.', 'royal', NOW()),
+            (4, 1, 'Rèm Cuốn Văn Phòng (Chống Nắng 100%)', 'Rèm cuốn trơn tráng bạc cản sáng cản nhiệt 100% gọn gàng cho văn phòng & tòa nhà.', 'blinds', NOW()),
+            (5, 1, 'Rèm Cuốn Lưới & In Tranh 3D', 'Rèm cuốn lưới nhìn xuyên không gian & rèm cuốn in tranh phong cảnh nghệ thuật.', 'blinds_mesh', NOW()),
+            (6, 1, 'Rèm Cầu Vồng Hàn Quốc (Modero/Combi)', 'Rèm cầu vồng nhập khẩu Hàn Quốc 2 lớp vải xoay lật điều chỉnh ánh sáng 180 độ.', 'rainbow', NOW()),
+            (7, 1, 'Rèm Sáo Gỗ & Rèm Sáo Nhôm', 'Rèm sáo gỗ sồi Nga tự nhiên bản 5cm & rèm sáo nhôm chống nước.', 'wooden', NOW()),
+            (8, 1, 'Rèm Tổ Ong & Vách Ngăn Tổ Ong', 'Rèm tổ ong cản nhiệt 100% xếp gọn & hệ vách ngăn tổ ong di động thông minh.', 'honeycomb', NOW()),
+            (9, 1, 'Rèm Roman Xếp Lớp', 'Rèm Roman may xếp lớp hiện đại tiết kiệm diện tích cho cửa sổ nhỏ.', 'roman', NOW()),
+            (10, 1, 'Rèm Lá Dọc Văn Phòng', 'Rèm lá dọc xoay lật 180 độ giá rẻ cản sáng hiệu quả cho văn phòng.', 'vertical', NOW()),
+            (11, 1, 'Rèm Tự Động Thông Minh', 'Động cơ rèm cửa tự động tích hợp điều khiển từ xa, remote & App Smarthome.', 'smart', NOW()),
 
-            -- Chuyên Đề: Ốp Tường, Trần & Trang Trí (Kosmos)
-            (6, 2, 'Tấm Ốp Nhựa PVC Vân Đá', 'Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương chống ẩm mốc 100%', 'pvc_wall', NOW()),
-            (7, 2, 'Tấm Ốp Lam Sóng Trang Trí', 'Tấm ốp lam sóng nhựa PVC/PS giả gỗ trang trí vách TV & tường phòng khách', 'lam_song', NOW()),
-            (8, 2, 'Tấm Ốp Nhựa Nano', 'Tấm ốp nhựa Nano vân gỗ tự nhiên, hoa văn dán tường & ốp trần nhà', 'nano_panel', NOW()),
-            (9, 2, 'Giấy Dán Tường & Tranh 3D', 'Giấy dán tường Hàn Quốc, Nhật Bản & tranh dán tường 3D hiện đại', 'wallpaper', NOW()),
-            (10, 2, 'Gỗ Nhựa Ngoài Trời', 'Lam gỗ nhựa ngoài trời, tấm ốp ngoài trời chống mưa nắng & thời tiết', 'outdoor_wood', NOW()),
+            -- --- CHUYÊN ĐỀ 2: ỐP TƯỜNG, TRẦN & TRANG TRÍ (Kosmos Full Taxonomy) ---
+            (12, 2, 'Tấm Ốp Nhựa PVC Vân Đá Tráng Gương', 'Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương sáng bóng, chống ẩm mốc 100%.', 'pvc_wall', NOW()),
+            (13, 2, 'Tấm Ốp Lam Sóng Trang Trí Vách TV', 'Tấm ốp lam sóng nhựa PVC/PS cốt nguyên sinh E0 tạo điểm nhấn vách TV phòng khách.', 'lam_song', NOW()),
+            (14, 2, 'Tấm Ốp Nhựa Nano Vân Gỗ & Hoa Văn', 'Tấm ốp Nano phẳng hèm khóa giấu nẹp, vân gỗ tự nhiên & hoa văn trang trí trần tường.', 'nano_panel', NOW()),
+            (15, 2, 'Giấy Dán Tường Hàn Quốc & Tranh 3D', 'Giấy dán tường Hàn Quốc chính hãng & tranh dán tường 3D khổ lớn in theo kích thước.', 'wallpaper', NOW()),
+            (16, 2, 'Sàn Nhựa Hèm Khóa & Gỗ Nhựa Ngoài Trời', 'Sàn nhựa SPC hèm khóa 4mm-6mm & lam gỗ nhựa ngoài trời chịu mưa nắng.', 'outdoor_wood', NOW()),
 
-            -- Chuyên Đề: Dịch Vụ & Bảo Trì
-            (11, 3, 'Dịch Vụ Giặt Màn Rèm Tận Nhà', 'Tháo lắp, mang về giặt hấp khử khuẩn và lắp đặt lại hoàn chỉnh trong ngày', 'curtain_wash', NOW()),
-            (12, 3, 'Sửa Chữa & Thay Phụ Kiện Rèm', 'Sửa chữa rèm kẹt, thay thanh treo, thay dây kéo & phụ kiện màn rèm', 'repair_service', NOW());
+            -- --- CHUYÊN ĐỀ 3: DỊCH VỤ & BẢO TRÌ ---
+            (17, 3, 'Dịch Vụ Giặt Màn Rèm Tận Nhà', 'Nhân viên đến tận nơi tháo rèm, mang về giặt hấp khử khuẩn và lắp lại hoàn chỉnh trong ngày.', 'curtain_wash', NOW()),
+            (18, 3, 'Sửa Chữa & Thay Phụ Kiện Rèm Cửa', 'Sửa rèm kẹt, thay thanh treo rèm, dây kéo, bánh xe & phụ kiện màn rèm cũ.', 'repair', NOW());
 
-        -- 3. Seed Sample Real-world Products
+        -- 3. Seed Sample Products across all categories
         INSERT INTO ""Products"" (""Id"", ""Title"", ""Price"", ""Description"", ""ImageUrl"", ""CategoryId"", ""CreatedAt"")
         VALUES 
-            (1, 'Rèm Vải 2 Lớp Chống Nắng Cao Cấp', 0, 'Phối hợp giữa lớp voan thêu tay mềm mại và lớp vải gấm cản sáng 100%, cách nhiệt hiệu quả.', 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600', 1, NOW()),
-            (2, 'Rèm Cuốn Văn Phòng Trơn Tráng Bạc', 0, 'Chất liệu Polyester phủ lớp tráng bạc chống tia UV, gọn gàng dễ vệ sinh cho văn phòng.', 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600', 2, NOW()),
-            (3, 'Rèm Cầu Vồng Hàn Quốc Modero', 0, 'Rèm cầu vồng nhập khẩu Hàn Quốc hệ thanh nhôm sơn tĩnh điện cao cấp xoay lật 180 độ.', 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600', 3, NOW()),
-            (4, 'Rèm Sáo Gỗ Sồi Nga Tự Nhiên', 0, 'Rèm gỗ tự nhiên bản lá 5cm đã qua xử lý hấp sấy chống mối mọt cong vênh.', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600', 4, NOW()),
-            (5, 'Tấm Ốp Tường Nhựa PVC Vân Đá Tráng Gương', 0, 'Tấm ốp nhựa PVC tráng gương sáng bóng như đá tự nhiên cẩm thạch, chống ẩm mốc tuyệt đối.', 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600', 6, NOW()),
-            (6, 'Tấm Ốp Lam Sóng Nhựa Giả Gỗ Vách TV', 0, 'Tấm ốp lam sóng cốt nhựa PVC nguyên sinh E0 an toàn sức khỏe, trang trí vách TV phòng khách.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', 7, NOW()),
-            (7, 'Tấm Ốp Nhựa Nano Vân Gỗ Ốp Trần & Tường', 0, 'Tấm ốp Nano phẳng vân gỗ tự nhiên ấm cúng, thi công hèm khóa không lộ vết ghép.', 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=600', 8, NOW()),
-            (8, 'Dịch Vụ Tháo Lắp & Giặt Màn Rèm Hấp Khử Khuẩn', 0, 'Nhân viên đến tận nhà tháo rèm mang về giặt hấp khử khuẩn và lắp đặt lại hoàn chỉnh trong ngày.', 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600', 11, NOW());
+            (1, 'Rèm Vải 2 Lớp Chống Nắng 100% Nhật Bản', 0, 'Sự kết hợp giữa vải gấm dệt kim cao cấp cản sáng tuyệt đối và lớp voan trắng mềm mại.', 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600', 1, NOW()),
+            (2, 'Rèm Voan Thêu Tay Hoa Văn Tinh Tế', 0, 'Lớp voan thêu họa tiết nghệ thuật điểm nhẹ sang trọng cho cửa sổ phòng khách.', 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600', 2, NOW()),
+            (3, 'Rèm Vải Tân Cổ Điển Hoàng Gia Cho Biệt Thự', 0, 'Rèm gấm thêu viền yếm sò bèo nhún quý phái dành riêng cho biệt thự tân cổ điển.', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600', 3, NOW()),
+            (4, 'Rèm Cuốn Văn Phòng Trơn Tráng Bạc Chống Nắng', 0, 'Chất liệu tráng bạc cản sáng 100%, cách nhiệt hiệu quả cho không gian văn phòng.', 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600', 4, NOW()),
+            (5, 'Rèm Cầu Vồng Hàn Quốc Modero Cao Cấp', 0, 'Mẫu rèm cầu vồng 2 lớp điều chỉnh ánh sáng xoay lật linh hoạt nhập khẩu Hàn Quốc.', 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600', 6, NOW()),
+            (6, 'Rèm Sáo Gỗ Sồi Nga Tự Nhiên Bản 5cm', 0, 'Rèm gỗ tự nhiên tẩm sấy chống cong vênh mối mọt, lá gỗ xoay 180 độ điều tiết ánh sáng.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', 7, NOW()),
+            (7, 'Rèm Động Cơ Tự Động Kết Nối Smartphone', 0, 'Động cơ rèm thông minh êm ái tích hợp điều khiển từ xa bằng Remote và App điện thoại.', 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=600', 11, NOW()),
+            (8, 'Tấm Ốp Tường Nhựa PVC Vân Đá Tráng Gương', 0, 'Bề mặt phủ UV tráng gương bóng đẹp như đá cẩm thạch tự nhiên, chống ẩm mốc.', 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600', 12, NOW()),
+            (9, 'Tấm Ốp Lam Sóng Nhựa Giả Gỗ Trang Trí Vách TV', 0, 'Thiết kế 4 sóng cao sang trọng, cốt nhựa nguyên sinh E0 an toàn không mùi hôi.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', 13, NOW()),
+            (10, 'Tấm Ốp Nhựa Nano Phẳng Vân Gỗ Hèm Khóa', 0, 'Tấm ốp Nano phẳng ghép hèm khóa giấu nẹp, vân gỗ sồi tự nhiên ốp trần tường.', 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=600', 14, NOW()),
+            (11, 'Giấy Dán Tường Hàn Quốc Albany Hiện Đại', 0, 'Mẫu giấy dán tường Hàn Quốc họa tiết chìm tinh tế, bề mặt phủ Vinyl chùi rửa dễ.', 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=600', 15, NOW()),
+            (12, 'Dịch Vụ Giặt Màn Rèm Hấp Khử Khuẩn Tận Nhà', 0, 'Đội ngũ thợ đến tháo rèm tận nhà, mang về giặt hấp hơi nước nóng khử khuẩn 99.9%.', 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600', 17, NOW());
 
         -- Synchronize PostgreSQL IDENTITY Sequences
         SELECT setval(pg_get_serial_sequence('""CategoryGroups""', 'Id'), coalesce(max(""Id""), 1));
