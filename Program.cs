@@ -90,7 +90,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-// --- 5. Database Schema Auto-Migration ---
+// --- 5. Database Schema Auto-Migration & Clean Reset ---
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -131,32 +131,54 @@ using (var scope = app.Services.CreateScope())
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""CategoryId"" integer;
         ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""ImageUrl"" character varying(500) DEFAULT '';
 
-        -- Seed 3 Main Category Groups (Chuyên Đề)
+        -- CLEAR ALL LEGACY DATA FOR FRESH INDUSTRY RE-SEEDING
+        TRUNCATE TABLE ""Products"", ""Categories"", ""CategoryGroups"" RESTART IDENTITY CASCADE;
+
+        -- 1. Seed Official Category Groups (Chuyên Đề) from TheGioiRem & Kosmos
         INSERT INTO ""CategoryGroups"" (""Id"", ""Name"", ""Description"", ""IconName"")
         VALUES 
-            (1, 'Màn Rèm Cửa', 'Chuyên đề rèm vải 2 lớp, rèm cuốn văn phòng, rèm gỗ, rèm cầu vồng các loại', 'curtains'),
-            (2, 'Ốp Tường & Trang Trí', 'Chuyên đề tấm ốp nhựa PVC giả đá, lam sóng trang trí & giấy dán tường Hàn Quốc', 'wall'),
-            (3, 'Dịch Vụ & Bảo Trì', 'Chuyên đề tháo lắp, giặt hấp màn rèm cửa & dịch vụ vệ sinh trang thiết bị', 'cleaning_services')
-        ON CONFLICT (""Id"") DO NOTHING;
+            (1, 'Rèm Cửa & Màn Cửa', 'Các loại rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ & rèm tự động thông minh', 'curtains'),
+            (2, 'Ốp Tường, Trần & Trang Trí', 'Các loại tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường & gỗ nhựa ngoài trời', 'wall'),
+            (3, 'Dịch Vụ & Bảo Trì', 'Dịch vụ tháo lắp giặt hấp màn rèm tận nhà & sửa chữa phụ kiện rèm cửa', 'cleaning_services');
 
-        -- Seed Detailed Categories linked to Category Groups
+        -- 2. Seed Official Industry Categories (Danh Mục Chi Tiết)
         INSERT INTO ""Categories"" (""Id"", ""CategoryGroupId"", ""Name"", ""Description"", ""IconName"", ""CreatedAt"")
         VALUES 
+            -- Chuyên Đề: Rèm Cửa & Màn Cửa (TheGioiRem)
             (1, 1, 'Rèm Vải 2 Lớp', 'Rèm vải gấm, lụa, voan chống nắng 100% cho phòng khách & phòng ngủ', 'curtain', NOW()),
-            (2, 1, 'Rèm Cuốn Văn Phòng', 'Rèm cuốn văn phòng, chống nắng cách nhiệt hiện đại gọn gàng', 'blinds', NOW()),
-            (3, 1, 'Rèm Gỗ & Rèm Sáo', 'Rèm sáo gỗ tự nhiên cao cấp mang lại vẻ đẹp sang trọng', 'wooden_blinds', NOW()),
-            (4, 1, 'Rèm Cầu Vồng Hàn Quốc', 'Rèm cầu vồng Hàn Quốc thiết kế 2 lớp điều chỉnh ánh sáng', 'rainbow_blinds', NOW()),
-            (5, 2, 'Tấm Ốp PVC Vân Đá', 'Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương chống ẩm mốc', 'pvc_wall', NOW()),
-            (6, 2, 'Tấm Ốp Lam Sóng', 'Tấm ốp lam sóng nhựa PVC giả gỗ trang trí vách TV & tường', 'lam_song', NOW()),
-            (7, 2, 'Giấy Dán Tường Hàn Quốc', 'Giấy dán tường Hàn Quốc & tranh 3D dán tường cao cấp', 'wallpaper', NOW()),
-            (8, 3, 'Dịch Vụ Giặt Màn Rèm Tận Nhà', 'Dịch vụ tháo lắp, giặt hấp khử khuẩn màn rèm cửa tận nhà', 'curtain_wash', NOW())
-        ON CONFLICT (""Id"") DO UPDATE SET ""CategoryGroupId"" = EXCLUDED.""CategoryGroupId"";
+            (2, 1, 'Rèm Cuốn Văn Phòng', 'Rèm cuốn trơn, rèm cuốn lưới chống nắng cách nhiệt hiện đại', 'blinds', NOW()),
+            (3, 1, 'Rèm Cầu Vồng Hàn Quốc', 'Rèm cầu vồng Hàn Quốc 2 lớp xoay lật điều chỉnh ánh sáng linh hoạt', 'rainbow_blinds', NOW()),
+            (4, 1, 'Rèm Gỗ & Rèm Sáo', 'Rèm sáo gỗ tự nhiên, rèm sáo nhôm cao cấp sang trọng', 'wooden_blinds', NOW()),
+            (5, 1, 'Rèm Tự Động Thông Minh', 'Động cơ rèm cửa điều khiển từ xa qua công tắc, remote & ứng dụng điện thoại', 'smart_curtain', NOW()),
+
+            -- Chuyên Đề: Ốp Tường, Trần & Trang Trí (Kosmos)
+            (6, 2, 'Tấm Ốp Nhựa PVC Vân Đá', 'Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương chống ẩm mốc 100%', 'pvc_wall', NOW()),
+            (7, 2, 'Tấm Ốp Lam Sóng Trang Trí', 'Tấm ốp lam sóng nhựa PVC/PS giả gỗ trang trí vách TV & tường phòng khách', 'lam_song', NOW()),
+            (8, 2, 'Tấm Ốp Nhựa Nano', 'Tấm ốp nhựa Nano vân gỗ tự nhiên, hoa văn dán tường & ốp trần nhà', 'nano_panel', NOW()),
+            (9, 2, 'Giấy Dán Tường & Tranh 3D', 'Giấy dán tường Hàn Quốc, Nhật Bản & tranh dán tường 3D hiện đại', 'wallpaper', NOW()),
+            (10, 2, 'Gỗ Nhựa Ngoài Trời', 'Lam gỗ nhựa ngoài trời, tấm ốp ngoài trời chống mưa nắng & thời tiết', 'outdoor_wood', NOW()),
+
+            -- Chuyên Đề: Dịch Vụ & Bảo Trì
+            (11, 3, 'Dịch Vụ Giặt Màn Rèm Tận Nhà', 'Tháo lắp, mang về giặt hấp khử khuẩn và lắp đặt lại hoàn chỉnh trong ngày', 'curtain_wash', NOW()),
+            (12, 3, 'Sửa Chữa & Thay Phụ Kiện Rèm', 'Sửa chữa rèm kẹt, thay thanh treo, thay dây kéo & phụ kiện màn rèm', 'repair_service', NOW());
+
+        -- 3. Seed Sample Real-world Products
+        INSERT INTO ""Products"" (""Id"", ""Title"", ""Price"", ""Description"", ""ImageUrl"", ""CategoryId"", ""CreatedAt"")
+        VALUES 
+            (1, 'Rèm Vải 2 Lớp Chống Nắng Cao Cấp', 0, 'Phối hợp giữa lớp voan thêu tay mềm mại và lớp vải gấm cản sáng 100%, cách nhiệt hiệu quả.', 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600', 1, NOW()),
+            (2, 'Rèm Cuốn Văn Phòng Trơn Tráng Bạc', 0, 'Chất liệu Polyester phủ lớp tráng bạc chống tia UV, gọn gàng dễ vệ sinh cho văn phòng.', 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600', 2, NOW()),
+            (3, 'Rèm Cầu Vồng Hàn Quốc Modero', 0, 'Rèm cầu vồng nhập khẩu Hàn Quốc hệ thanh nhôm sơn tĩnh điện cao cấp xoay lật 180 độ.', 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600', 3, NOW()),
+            (4, 'Rèm Sáo Gỗ Sồi Nga Tự Nhiên', 0, 'Rèm gỗ tự nhiên bản lá 5cm đã qua xử lý hấp sấy chống mối mọt cong vênh.', 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600', 4, NOW()),
+            (5, 'Tấm Ốp Tường Nhựa PVC Vân Đá Tráng Gương', 0, 'Tấm ốp nhựa PVC tráng gương sáng bóng như đá tự nhiên cẩm thạch, chống ẩm mốc tuyệt đối.', 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600', 6, NOW()),
+            (6, 'Tấm Ốp Lam Sóng Nhựa Giả Gỗ Vách TV', 0, 'Tấm ốp lam sóng cốt nhựa PVC nguyên sinh E0 an toàn sức khỏe, trang trí vách TV phòng khách.', 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600', 7, NOW()),
+            (7, 'Tấm Ốp Nhựa Nano Vân Gỗ Ốp Trần & Tường', 0, 'Tấm ốp Nano phẳng vân gỗ tự nhiên ấm cúng, thi công hèm khóa không lộ vết ghép.', 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=600', 8, NOW()),
+            (8, 'Dịch Vụ Tháo Lắp & Giặt Màn Rèm Hấp Khử Khuẩn', 0, 'Nhân viên đến tận nhà tháo rèm mang về giặt hấp khử khuẩn và lắp đặt lại hoàn chỉnh trong ngày.', 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600', 11, NOW());
 
         -- Synchronize PostgreSQL IDENTITY Sequences
-        SELECT setval(pg_get_serial_sequence('""CategoryGroups""', 'Id'), coalesce(max(""Id""), 1)) FROM ""CategoryGroups"";
-        SELECT setval(pg_get_serial_sequence('""Products""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Products"";
-        SELECT setval(pg_get_serial_sequence('""Categories""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Categories"";
-        SELECT setval(pg_get_serial_sequence('""Bookings""', 'Id'), coalesce(max(""Id""), 1)) FROM ""Bookings"";
+        SELECT setval(pg_get_serial_sequence('""CategoryGroups""', 'Id'), coalesce(max(""Id""), 1));
+        SELECT setval(pg_get_serial_sequence('""Categories""', 'Id'), coalesce(max(""Id""), 1));
+        SELECT setval(pg_get_serial_sequence('""Products""', 'Id'), coalesce(max(""Id""), 1));
+        SELECT setval(pg_get_serial_sequence('""Bookings""', 'Id'), coalesce(max(""Id""), 1));
     ";
 
     try
