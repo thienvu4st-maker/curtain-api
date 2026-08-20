@@ -5,7 +5,6 @@ namespace media_app_api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<CategoryGroup> CategoryGroups => Set<CategoryGroup>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
@@ -15,103 +14,206 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
-        // 1. Seed Category Groups (Chuyên Đề)
-        modelBuilder.Entity<CategoryGroup>().HasData(
-            new CategoryGroup
-            {
-                Id = 1,
-                Name = "Màn Rèm Cửa",
-                Description = "Chuyên đề rèm vải, rèm cuốn, rèm gỗ, rèm cầu vồng các loại.",
-                IconName = "curtains"
-            },
-            new CategoryGroup
-            {
-                Id = 2,
-                Name = "Ốp Tường & Trang Trí",
-                Description = "Chuyên đề tấm ốp nhựa PVC vân đá, lam sóng trang trí, giấy dán tường Hàn Quốc.",
-                IconName = "wall"
-            },
-            new CategoryGroup
-            {
-                Id = 3,
-                Name = "Dịch Vụ & Bảo Trì",
-                Description = "Chuyên đề dịch vụ tháo lắp, giặt hấp màn rèm & bảo dưỡng trang thiết bị.",
-                IconName = "cleaning_services"
-            }
-        );
+        // Configure Parent-Child self-referencing relationship
+        modelBuilder.Entity<Category>()
+            .HasOne(c => c.Parent)
+            .WithMany(c => c.SubCategories)
+            .HasForeignKey(c => c.ParentId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-        // 2. Seed Detailed Categories (Danh Mục Chi Tiết) linked to Category Groups
+        // 1. Seed Root Categories (ParentId = null)
         modelBuilder.Entity<Category>().HasData(
             new Category
             {
                 Id = 1,
-                CategoryGroupId = 1,
-                Name = "Rèm Vải 2 Lớp",
-                Description = "Rèm vải gấm, lụa, voan chống nắng 100% dành cho phòng khách và phòng ngủ.",
+                ParentId = null,
+                Name = "Rèm Cửa & Màn Cửa",
+                Description = "Các loại rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ, rèm tổ ong, roman & rèm tự động.",
+                IconName = "curtains",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 2,
+                ParentId = null,
+                Name = "Ốp Tường, Trần & Trang Trí",
+                Description = "Các loại tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường Hàn Quốc & gỗ nhựa ngoài trời.",
+                IconName = "wall",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 3,
+                ParentId = null,
+                Name = "Dịch Vụ & Bảo Trì",
+                Description = "Dịch vụ tháo lắp giặt hấp màn rèm tận nhà & sửa chữa thay thế phụ kiện rèm cửa.",
+                IconName = "cleaning_services",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+
+        // 2. Seed Sub-Categories (ParentId references Root Categories)
+        modelBuilder.Entity<Category>().HasData(
+            new Category
+            {
+                Id = 10,
+                ParentId = 1,
+                Name = "Rèm Vải 2 Lớp (Gấm & Voan)",
+                Description = "Phối hợp giữa lớp voan thêu mềm mại và lớp vải gấm cản sáng 100% cho phòng khách & phòng ngủ.",
                 IconName = "curtain",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 2,
-                CategoryGroupId = 1,
-                Name = "Rèm Cuốn Văn Phòng",
-                Description = "Rèm cuốn văn phòng, chống nắng cách nhiệt hiện đại gọn gàng.",
+                Id = 11,
+                ParentId = 1,
+                Name = "Rèm Voan & Voan Thêu Tay",
+                Description = "Voan trắng trơn, voan xước & voan thêu nghệ thuật nhẹ nhàng lãng mạn.",
+                IconName = "voan",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 12,
+                ParentId = 1,
+                Name = "Rèm Vải Tân Cổ Điển / Nữ Hoàng",
+                Description = "Rèm vải may bèo nhún yếm sò quý phái cho biệt thự tân cổ điển.",
+                IconName = "royal",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 13,
+                ParentId = 1,
+                Name = "Rèm Cuốn Văn Phòng (Chống Nắng 100%)",
+                Description = "Rèm cuốn trơn tráng bạc cản sáng cản nhiệt 100% cho văn phòng.",
                 IconName = "blinds",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 3,
-                CategoryGroupId = 1,
-                Name = "Rèm Gỗ & Rèm Sáo",
-                Description = "Rèm sáo gỗ tự nhiên cao cấp mang lại vẻ đẹp sang trọng ấm cúng.",
-                IconName = "wooden_blinds",
+                Id = 14,
+                ParentId = 1,
+                Name = "Rèm Cuốn Lưới & In Tranh 3D",
+                Description = "Rèm cuốn lưới nhìn xuyên không gian & rèm cuốn in tranh 3D nghệ thuật.",
+                IconName = "blinds_mesh",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 4,
-                CategoryGroupId = 1,
-                Name = "Rèm Cầu Vồng Hàn Quốc",
-                Description = "Rèm cầu vồng Hàn Quốc thiết kế 2 lớp điều chỉnh ánh sáng linh hoạt.",
-                IconName = "rainbow_blinds",
+                Id = 15,
+                ParentId = 1,
+                Name = "Rèm Cầu Vồng Hàn Quốc (Modero/Combi)",
+                Description = "Rèm cầu vồng nhập khẩu Hàn Quốc 2 lớp xoay lật điều chỉnh ánh sáng 180 độ.",
+                IconName = "rainbow",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 5,
-                CategoryGroupId = 2,
-                Name = "Tấm Ốp PVC Vân Đá",
-                Description = "Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương chống ẩm mốc.",
+                Id = 16,
+                ParentId = 1,
+                Name = "Rèm Sáo Gỗ & Rèm Sáo Nhôm",
+                Description = "Rèm sáo gỗ sồi Nga tự nhiên bản 5cm & rèm sáo nhôm chống nước.",
+                IconName = "wooden",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 17,
+                ParentId = 1,
+                Name = "Rèm Tổ Ong & Vách Ngăn Tổ Ong",
+                Description = "Rèm tổ ong cản nhiệt 100% & hệ vách ngăn tổ ong di động thông minh.",
+                IconName = "honeycomb",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 18,
+                ParentId = 1,
+                Name = "Rèm Roman Xếp Lớp",
+                Description = "Rèm Roman may xếp lớp hiện đại tiết kiệm diện tích cho cửa sổ nhỏ.",
+                IconName = "roman",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 19,
+                ParentId = 1,
+                Name = "Rèm Lá Dọc Văn Phòng",
+                Description = "Rèm lá dọc xoay lật 180 độ giá rẻ cản sáng hiệu quả cho văn phòng.",
+                IconName = "vertical",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 20,
+                ParentId = 1,
+                Name = "Rèm Tự Động Thông Minh",
+                Description = "Động cơ rèm cửa tự động tích hợp điều khiển từ xa, remote & App Smarthome.",
+                IconName = "smart",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 21,
+                ParentId = 2,
+                Name = "Tấm Ốp Nhựa PVC Vân Đá Tráng Gương",
+                Description = "Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương sáng bóng, chống ẩm mốc 100%.",
                 IconName = "pvc_wall",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 6,
-                CategoryGroupId = 2,
-                Name = "Tấm Ốp Lam Sóng",
-                Description = "Tấm ốp lam sóng nhựa PVC giả gỗ trang trí vách TV & tường.",
+                Id = 22,
+                ParentId = 2,
+                Name = "Tấm Ốp Lam Sóng Trang Trí Vách TV",
+                Description = "Tấm ốp lam sóng nhựa PVC/PS cốt nguyên sinh E0 tạo điểm nhấn vách TV phòng khách.",
                 IconName = "lam_song",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 7,
-                CategoryGroupId = 2,
-                Name = "Giấy Dán Tường Hàn Quốc",
-                Description = "Giấy dán tường Hàn Quốc & tranh 3D dán tường cao cấp.",
+                Id = 23,
+                ParentId = 2,
+                Name = "Tấm Ốp Nhựa Nano Vân Gỗ & Hoa Văn",
+                Description = "Tấm ốp Nano phẳng hèm khóa giấu nẹp, vân gỗ tự nhiên & hoa văn trang trí trần tường.",
+                IconName = "nano_panel",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 24,
+                ParentId = 2,
+                Name = "Giấy Dán Tường Hàn Quốc & Tranh 3D",
+                Description = "Giấy dán tường Hàn Quốc chính hãng & tranh dán tường 3D khổ lớn in theo kích thước.",
                 IconName = "wallpaper",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
-                Id = 8,
-                CategoryGroupId = 3,
+                Id = 25,
+                ParentId = 2,
+                Name = "Sàn Nhựa Hèm Khóa & Gỗ Nhựa Ngoài Trời",
+                Description = "Sàn nhựa SPC hèm khóa 4mm-6mm & lam gỗ nhựa ngoài trời chịu mưa nắng.",
+                IconName = "outdoor_wood",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 26,
+                ParentId = 3,
                 Name = "Dịch Vụ Giặt Màn Rèm Tận Nhà",
-                Description = "Dịch vụ tháo lắp, giặt hấp khử khuẩn màn rèm cửa tận nhà trong ngày.",
+                Description = "Tháo rèm tận nhà, mang về giặt hấp khử khuẩn và lắp lại hoàn chỉnh trong ngày.",
                 IconName = "curtain_wash",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Category
+            {
+                Id = 27,
+                ParentId = 3,
+                Name = "Sửa Chữa & Thay Phụ Kiện Rèm Cửa",
+                Description = "Sửa rèm kẹt, thay thanh treo, dây kéo & phụ kiện màn rèm cũ.",
+                IconName = "repair",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
@@ -121,81 +223,61 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Product
             {
                 Id = 1,
-                Title = "Rèm Vải 2 Lớp Chống Nắng Cao Cấp",
+                Title = "Rèm Vải 2 Lớp Chống Nắng 100% Nhật Bản",
                 Price = 0m,
-                Description = "Rèm vải 2 lớp kết hợp lớp voan thêu tay nhẹ nhàng và lớp gấm chống nắng 100%.",
+                Description = "Sự kết hợp giữa vải gấm dệt kim cao cấp cản sáng tuyệt đối và lớp voan trắng mềm mại.",
                 ImageUrl = "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600",
-                CategoryId = 1,
+                CategoryId = 10,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Product
             {
                 Id = 2,
-                Title = "Rèm Cuốn Văn Phòng Trơn Tráng Bạc",
+                Title = "Rèm Voan Thêu Tay Hoa Văn Tinh Tế",
                 Price = 0m,
-                Description = "Rèm cuốn trơn chất liệu Polyester phủ lớp tráng bạc chống tia UV hiệu quả.",
+                Description = "Lớp voan thêu họa tiết nghệ thuật điểm nhẹ sang trọng cho cửa sổ phòng khách.",
                 ImageUrl = "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600",
-                CategoryId = 2,
+                CategoryId = 11,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Product
             {
                 Id = 3,
-                Title = "Rèm Sáo Gỗ Sồi Nga Tự Nhiên",
+                Title = "Rèm Cầu Vồng Hàn Quốc Modero Cao Cấp",
                 Price = 0m,
-                Description = "Rèm gỗ tự nhiên bản lá 5cm đã qua xử lý hấp sấy chống mối mọt cong vênh.",
-                ImageUrl = "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600",
-                CategoryId = 3,
+                Description = "Mẫu rèm cầu vồng 2 lớp điều chỉnh ánh sáng xoay lật linh hoạt nhập khẩu Hàn Quốc.",
+                ImageUrl = "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600",
+                CategoryId = 15,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Product
             {
                 Id = 4,
-                Title = "Rèm Cầu Vồng Hàn Quốc Modero",
+                Title = "Tấm Ốp Tường Nhựa PVC Vân Đá Tráng Gương",
                 Price = 0m,
-                Description = "Rèm cầu vồng nhập khẩu Hàn Quốc hệ thanh nhôm cao cấp xoay 180 độ.",
-                ImageUrl = "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600",
-                CategoryId = 4,
+                Description = "Bề mặt phủ UV tráng gương bóng đẹp như đá cẩm thạch tự nhiên, chống ẩm mốc.",
+                ImageUrl = "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600",
+                CategoryId = 21,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Product
             {
                 Id = 5,
-                Title = "Tấm Ốp Tường Nhựa PVC Vân Đá Tráng Gương",
+                Title = "Tấm Ốp Lam Sóng Nhựa Giả Gỗ Trang Trí Vách TV",
                 Price = 0m,
-                Description = "Tấm ốp nhựa PVC tráng gương sáng bóng như đá tự nhiên chống ẩm mốc.",
-                ImageUrl = "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600",
-                CategoryId = 5,
+                Description = "Thiết kế 4 sóng cao sang trọng, cốt nhựa nguyên sinh E0 an toàn không mùi hôi.",
+                ImageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
+                CategoryId = 22,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Product
             {
                 Id = 6,
-                Title = "Tấm Ốp Lam Sóng Nhựa Giả Gỗ Vách TV",
-                Price = 0m,
-                Description = "Tấm ốp lam sóng cốt nhựa PVC nguyên sinh E0 tạo vách nhấn trang trí TV.",
-                ImageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
-                CategoryId = 6,
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            },
-            new Product
-            {
-                Id = 7,
-                Title = "Giấy Dán Tường Hàn Quốc Họa Tiết Tân Cổ Điển",
-                Price = 0m,
-                Description = "Mẫu hoa văn chìm tinh tế bề mặt phủ Vinyl chùi rửa dễ dàng.",
-                ImageUrl = "https://images.unsplash.com/photo-1615873968403-89e068629265?w=600",
-                CategoryId = 7,
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            },
-            new Product
-            {
-                Id = 8,
                 Title = "Dịch Vụ Giặt Màn Rèm Hấp Khử Khuẩn Tận Nhà",
                 Price = 0m,
-                Description = "Tháo rèm tận nhà, mang về giặt hấp khử khuẩn và tháo lắp lại hoàn chỉnh trong ngày.",
+                Description = "Đội ngũ thợ đến tháo rèm tận nhà, mang về giặt hấp hơi nước nóng khử khuẩn 99.9%.",
                 ImageUrl = "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600",
-                CategoryId = 8,
+                CategoryId = 26,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
