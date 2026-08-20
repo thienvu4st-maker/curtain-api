@@ -130,7 +130,7 @@ public class AuthService(AppDbContext db, IConfiguration configuration) : IAuthS
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(15), // Short-lived Access Token (15 minutes)
+            Expires = DateTime.UtcNow.AddDays(7), // 7-day Access Token for mobile/desktop admin app
             SigningCredentials = creds,
             Issuer = configuration["Jwt:Issuer"] ?? "MediaAppApi",
             Audience = configuration["Jwt:Audience"] ?? "MediaAppClient"
