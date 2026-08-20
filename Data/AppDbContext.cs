@@ -10,6 +10,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Booking> Bookings => Set<Booking>();
+    public DbSet<ECatalog> ECatalogs => Set<ECatalog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -280,6 +281,46 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                 Description = "Đội ngũ thợ đến tháo rèm tận nhà, mang về giặt hấp hơi nước nóng khử khuẩn 99.9%.",
                 ImageUrl = "https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=600",
                 CategoryId = 26,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+
+        // 4. Seed ECatalogs (Mẫu Chọn Màu Điện Tử 2025-2026)
+        modelBuilder.Entity<ECatalog>().HasData(
+            new ECatalog
+            {
+                Id = 1,
+                Title = "SHIREN Interior Curtain Collection 2025 - 2026 (Vol 12)",
+                Description = "Bộ sưu tập Catalogue mẫu vải rèm gấm cản sáng, voan thêu nghệ thuật nhập khẩu Nhật Bản & Châu Âu.",
+                CoverImageUrl = "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600",
+                PdfUrl = "https://heyzine.com/flip-book/1a2b3c4d5e.html",
+                CategoryGroupId = 1,
+                CategoryId = 10,
+                PageCount = 41,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new ECatalog
+            {
+                Id = 2,
+                Title = "MODERO Korea Luxury Blinds & Shades 2025",
+                Description = "Catalogue điện tử chọn mẫu rèm cầu vồng, rèm cuốn tráng bạc & rèm tổ ong cao cấp Hàn Quốc.",
+                CoverImageUrl = "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=600",
+                PdfUrl = "https://heyzine.com/flip-book/modero-korea-2025.html",
+                CategoryGroupId = 1,
+                CategoryId = 15,
+                PageCount = 68,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new ECatalog
+            {
+                Id = 3,
+                Title = "KOSMOS Tấm Ốp PVC Vân Đá & Lam Sóng 2025",
+                Description = "Catalogue tổng hợp các mẫu tấm ốp PVC tráng gương vân đá cẩm thạch & lam sóng ốp vách TV.",
+                CoverImageUrl = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600",
+                PdfUrl = "https://heyzine.com/flip-book/kosmos-pvc-2025.html",
+                CategoryGroupId = 2,
+                CategoryId = 21,
+                PageCount = 52,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
