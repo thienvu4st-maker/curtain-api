@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace media_app_api.Models;
@@ -18,8 +19,13 @@ public class Category
     [MaxLength(100)]
     public string IconName { get; set; } = "curtain";
 
-    public int? CategoryGroupId { get; set; }
-    public CategoryGroup? CategoryGroup { get; set; }
+    // Self-referencing Parent ID for unlimited recursive category hierarchy
+    public int? ParentId { get; set; }
+
+    [ForeignKey(nameof(ParentId))]
+    public Category? Parent { get; set; }
+
+    public ICollection<Category> SubCategories { get; set; } = new List<Category>();
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
