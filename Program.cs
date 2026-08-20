@@ -6,16 +6,11 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-var builder = WebApplication.CreateBuilder(args);
+// Disable FileSystemWatcher inotify before WebApplicationBuilder constructor runs
+Environment.SetEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "true");
+Environment.SetEnvironmentVariable("DOTNET_CONFIGURATION_DISABLE_FILE_WATCHING", "true");
 
-// Disable inotify FileSystemWatcher to prevent Linux container inotify instance limit crash on Render
-builder.Host.ConfigureAppConfiguration((hostingContext, config) =>
-{
-    config.Sources.Clear();
-    config.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-          .AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
-          .AddEnvironmentVariables();
-});
+var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. Database Context ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
