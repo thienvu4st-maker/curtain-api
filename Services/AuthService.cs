@@ -15,7 +15,7 @@ public class AuthService(AppDbContext db, IConfiguration configuration) : IAuthS
     public async Task<AuthResponseDto?> RegisterAsync(RegisterDto request)
     {
         if (await db.Users.AnyAsync(u => u.Username.ToLower() == request.Username.ToLower()))
-            return null; // Username already exists
+            return null;
 
         CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
@@ -123,14 +123,16 @@ public class AuthService(AppDbContext db, IConfiguration configuration) : IAuthS
             new(ClaimTypes.Role, user.Role)
         };
 
-        var keySecret = configuration["Jwt:Secret"] ?? "SuperSecretKeyForEnterpriseMediaApp2026!MustBeAtLeast64BytesLongForHmacSha512AlgorithmValidation!";
+        var keySecret = configuration["Jwt:Secret"]
+            ?? throw new InvalidOperationException("Jwt:Secret is not configured in Configuration or environment variables.");
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keySecret));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7), // 7-day Access Token for mobile/desktop admin app
+            Expires = DateTime.UtcNow.AddMinutes(15), // Standard short-lived Access Token (15 minutes)
             SigningCredentials = creds,
             Issuer = configuration["Jwt:Issuer"] ?? "MediaAppApi",
             Audience = configuration["Jwt:Audience"] ?? "MediaAppClient"
@@ -152,14 +154,16 @@ public class AuthService(AppDbContext db, IConfiguration configuration) : IAuthS
 
     private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
-        var keySecret = configuration["Jwt:Secret"] ?? "SuperSecretKeyForEnterpriseMediaApp2026!MustBeAtLeast64BytesLongForHmacSha512AlgorithmValidation!";
+        var keySecret = configuration["Jwt:Secret"]
+            ?? throw new InvalidOperationException("Jwt:Secret is not configured in Configuration or environment variables.");
+
         var tokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = false,
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keySecret)),
-            ValidateLifetime = false // Ignore expiration time when validating expired access token for refresh
+            ValidateLifetime = false
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

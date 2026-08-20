@@ -30,7 +30,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 
 // --- 2. JWT Authentication ---
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "SuperSecretKeyForEnterpriseMediaApp2026!MustBeAtLeast64BytesLongForHmacSha512AlgorithmValidation!";
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? throw new InvalidOperationException("Jwt:Secret is not configured in appsettings.json or environment variables.");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
