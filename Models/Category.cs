@@ -19,7 +19,11 @@ public class Category
     [MaxLength(100)]
     public string IconName { get; set; } = "curtain";
 
-    // Self-referencing Parent ID for unlimited recursive category hierarchy
+    // CategoryGroup FK
+    public int? CategoryGroupId { get; set; }
+    public CategoryGroup? CategoryGroup { get; set; }
+
+    // Self-referencing Parent ID
     public int? ParentId { get; set; }
 
     [ForeignKey(nameof(ParentId))]

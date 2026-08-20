@@ -11,6 +11,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
     {
         var categories = await db.Categories
             .AsNoTracking()
+            .Include(c => c.CategoryGroup)
             .Include(c => c.Parent)
             .Include(c => c.SubCategories)
             .Include(c => c.Products)
@@ -23,6 +24,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
     {
         var category = await db.Categories
             .AsNoTracking()
+            .Include(c => c.CategoryGroup)
             .Include(c => c.Parent)
             .Include(c => c.SubCategories)
             .Include(c => c.Products)
@@ -40,6 +42,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
             Name = request.Name,
             Description = request.Description ?? string.Empty,
             IconName = request.IconName ?? "curtain",
+            CategoryGroupId = request.CategoryGroupId,
             ParentId = request.ParentId,
             CreatedAt = DateTime.UtcNow
         };
@@ -54,7 +57,14 @@ public class CategoryService(AppDbContext db) : ICategoryService
             parentName = parent?.Name;
         }
 
-        return new CategoryDto(category.Id, category.Name, category.Description, category.IconName, category.ParentId, parentName, 0, []);
+        string? groupName = null;
+        if (request.CategoryGroupId.HasValue)
+        {
+            var group = await db.CategoryGroups.FindAsync(request.CategoryGroupId.Value);
+            groupName = group?.Name;
+        }
+
+        return new CategoryDto(category.Id, category.Name, category.Description, category.IconName, category.CategoryGroupId, groupName, category.ParentId, parentName, 0, []);
     }
 
     public async Task<CategoryDto?> UpdateCategoryAsync(int id, UpdateCategoryDto request)
@@ -64,6 +74,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
 
         category.Name = request.Name;
         category.Description = request.Description ?? string.Empty;
+        category.CategoryGroupId = request.CategoryGroupId;
         category.ParentId = request.ParentId;
 
         if (!string.IsNullOrEmpty(request.IconName))
@@ -80,8 +91,15 @@ public class CategoryService(AppDbContext db) : ICategoryService
             parentName = parent?.Name;
         }
 
+        string? groupName = null;
+        if (request.CategoryGroupId.HasValue)
+        {
+            var group = await db.CategoryGroups.FindAsync(request.CategoryGroupId.Value);
+            groupName = group?.Name;
+        }
+
         var count = await db.Products.CountAsync(p => p.CategoryId == id);
-        return new CategoryDto(category.Id, category.Name, category.Description, category.IconName, category.ParentId, parentName, count, []);
+        return new CategoryDto(category.Id, category.Name, category.Description, category.IconName, category.CategoryGroupId, groupName, category.ParentId, parentName, count, []);
     }
 
     public async Task<bool> DeleteCategoryAsync(int id)
@@ -101,6 +119,8 @@ public class CategoryService(AppDbContext db) : ICategoryService
             c.Name,
             c.Description,
             c.IconName,
+            c.CategoryGroupId,
+            c.CategoryGroup?.Name,
             c.ParentId,
             c.Parent?.Name,
             c.Products.Count,

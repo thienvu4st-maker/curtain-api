@@ -5,6 +5,8 @@ public record CategoryDto(
     string Name,
     string Description,
     string IconName,
+    int? CategoryGroupId,
+    string? CategoryGroupName,
     int? ParentId,
     string? ParentName,
     int ProductCount,
@@ -15,6 +17,7 @@ public record CreateCategoryDto(
     string Name,
     string Description,
     string IconName,
+    int? CategoryGroupId,
     int? ParentId
 );
 
@@ -22,5 +25,6 @@ public record UpdateCategoryDto(
     string Name,
     string Description,
     string IconName,
+    int? CategoryGroupId,
     int? ParentId
 );

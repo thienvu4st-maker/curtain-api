@@ -5,6 +5,7 @@ namespace media_app_api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
+    public DbSet<CategoryGroup> CategoryGroups => Set<CategoryGroup>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<User> Users => Set<User>();
@@ -14,6 +15,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(modelBuilder);
 
+        // Configure CategoryGroup -> Categories Relationship
+        modelBuilder.Entity<CategoryGroup>()
+            .HasMany(g => g.Categories)
+            .WithOne(c => c.CategoryGroup)
+            .HasForeignKey(c => c.CategoryGroupId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Configure Parent-Child self-referencing relationship
         modelBuilder.Entity<Category>()
             .HasOne(c => c.Parent)
@@ -21,52 +29,46 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             .HasForeignKey(c => c.ParentId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // 1. Seed Root Categories (ParentId = null)
-        modelBuilder.Entity<Category>().HasData(
-            new Category
+        // 1. Seed Category Groups (Chuyên Đề)
+        modelBuilder.Entity<CategoryGroup>().HasData(
+            new CategoryGroup
             {
                 Id = 1,
-                ParentId = null,
                 Name = "Rèm Cửa & Màn Cửa",
-                Description = "Các loại rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ, rèm tổ ong, roman & rèm tự động.",
-                IconName = "curtains",
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                Description = "Đầy đủ các loại rèm vải, rèm cuốn, rèm cầu vồng, rèm gỗ, rèm tổ ong, roman & rèm tự động.",
+                IconName = "curtains"
             },
-            new Category
+            new CategoryGroup
             {
                 Id = 2,
-                ParentId = null,
                 Name = "Ốp Tường, Trần & Trang Trí",
-                Description = "Các loại tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường Hàn Quốc & gỗ nhựa ngoài trời.",
-                IconName = "wall",
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                Description = "Đầy đủ tấm ốp nhựa PVC vân đá, lam sóng, ốp Nano, giấy dán tường Hàn Quốc & gỗ nhựa ngoài trời.",
+                IconName = "wall"
             },
-            new Category
+            new CategoryGroup
             {
                 Id = 3,
-                ParentId = null,
                 Name = "Dịch Vụ & Bảo Trì",
                 Description = "Dịch vụ tháo lắp giặt hấp màn rèm tận nhà & sửa chữa thay thế phụ kiện rèm cửa.",
-                IconName = "cleaning_services",
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                IconName = "cleaning_services"
             }
         );
 
-        // 2. Seed Sub-Categories (ParentId references Root Categories)
+        // 2. Seed Categories linked to CategoryGroups
         modelBuilder.Entity<Category>().HasData(
             new Category
             {
                 Id = 10,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Vải 2 Lớp (Gấm & Voan)",
-                Description = "Phối hợp giữa lớp voan thêu mềm mại và lớp vải gấm cản sáng 100% cho phòng khách & phòng ngủ.",
+                Description = "Phối hợp giữa voan thêu mềm mại và vải gấm cản sáng 100% cho phòng khách & phòng ngủ.",
                 IconName = "curtain",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new Category
             {
                 Id = 11,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Voan & Voan Thêu Tay",
                 Description = "Voan trắng trơn, voan xước & voan thêu nghệ thuật nhẹ nhàng lãng mạn.",
                 IconName = "voan",
@@ -75,7 +77,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 12,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Vải Tân Cổ Điển / Nữ Hoàng",
                 Description = "Rèm vải may bèo nhún yếm sò quý phái cho biệt thự tân cổ điển.",
                 IconName = "royal",
@@ -84,7 +86,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 13,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Cuốn Văn Phòng (Chống Nắng 100%)",
                 Description = "Rèm cuốn trơn tráng bạc cản sáng cản nhiệt 100% cho văn phòng.",
                 IconName = "blinds",
@@ -93,7 +95,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 14,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Cuốn Lưới & In Tranh 3D",
                 Description = "Rèm cuốn lưới nhìn xuyên không gian & rèm cuốn in tranh 3D nghệ thuật.",
                 IconName = "blinds_mesh",
@@ -102,7 +104,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 15,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Cầu Vồng Hàn Quốc (Modero/Combi)",
                 Description = "Rèm cầu vồng nhập khẩu Hàn Quốc 2 lớp xoay lật điều chỉnh ánh sáng 180 độ.",
                 IconName = "rainbow",
@@ -111,7 +113,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 16,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Sáo Gỗ & Rèm Sáo Nhôm",
                 Description = "Rèm sáo gỗ sồi Nga tự nhiên bản 5cm & rèm sáo nhôm chống nước.",
                 IconName = "wooden",
@@ -120,7 +122,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 17,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Tổ Ong & Vách Ngăn Tổ Ong",
                 Description = "Rèm tổ ong cản nhiệt 100% & hệ vách ngăn tổ ong di động thông minh.",
                 IconName = "honeycomb",
@@ -129,7 +131,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 18,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Roman Xếp Lớp",
                 Description = "Rèm Roman may xếp lớp hiện đại tiết kiệm diện tích cho cửa sổ nhỏ.",
                 IconName = "roman",
@@ -138,7 +140,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 19,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Lá Dọc Văn Phòng",
                 Description = "Rèm lá dọc xoay lật 180 độ giá rẻ cản sáng hiệu quả cho văn phòng.",
                 IconName = "vertical",
@@ -147,7 +149,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 20,
-                ParentId = 1,
+                CategoryGroupId = 1,
                 Name = "Rèm Tự Động Thông Minh",
                 Description = "Động cơ rèm cửa tự động tích hợp điều khiển từ xa, remote & App Smarthome.",
                 IconName = "smart",
@@ -156,7 +158,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 21,
-                ParentId = 2,
+                CategoryGroupId = 2,
                 Name = "Tấm Ốp Nhựa PVC Vân Đá Tráng Gương",
                 Description = "Tấm ốp nhựa PVC giả đá cẩm thạch tráng gương sáng bóng, chống ẩm mốc 100%.",
                 IconName = "pvc_wall",
@@ -165,7 +167,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 22,
-                ParentId = 2,
+                CategoryGroupId = 2,
                 Name = "Tấm Ốp Lam Sóng Trang Trí Vách TV",
                 Description = "Tấm ốp lam sóng nhựa PVC/PS cốt nguyên sinh E0 tạo điểm nhấn vách TV phòng khách.",
                 IconName = "lam_song",
@@ -174,7 +176,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 23,
-                ParentId = 2,
+                CategoryGroupId = 2,
                 Name = "Tấm Ốp Nhựa Nano Vân Gỗ & Hoa Văn",
                 Description = "Tấm ốp Nano phẳng hèm khóa giấu nẹp, vân gỗ tự nhiên & hoa văn trang trí trần tường.",
                 IconName = "nano_panel",
@@ -183,7 +185,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 24,
-                ParentId = 2,
+                CategoryGroupId = 2,
                 Name = "Giấy Dán Tường Hàn Quốc & Tranh 3D",
                 Description = "Giấy dán tường Hàn Quốc chính hãng & tranh dán tường 3D khổ lớn in theo kích thước.",
                 IconName = "wallpaper",
@@ -192,7 +194,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 25,
-                ParentId = 2,
+                CategoryGroupId = 2,
                 Name = "Sàn Nhựa Hèm Khóa & Gỗ Nhựa Ngoài Trời",
                 Description = "Sàn nhựa SPC hèm khóa 4mm-6mm & lam gỗ nhựa ngoài trời chịu mưa nắng.",
                 IconName = "outdoor_wood",
@@ -201,7 +203,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 26,
-                ParentId = 3,
+                CategoryGroupId = 3,
                 Name = "Dịch Vụ Giặt Màn Rèm Tận Nhà",
                 Description = "Tháo rèm tận nhà, mang về giặt hấp khử khuẩn và lắp lại hoàn chỉnh trong ngày.",
                 IconName = "curtain_wash",
@@ -210,7 +212,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             new Category
             {
                 Id = 27,
-                ParentId = 3,
+                CategoryGroupId = 3,
                 Name = "Sửa Chữa & Thay Phụ Kiện Rèm Cửa",
                 Description = "Sửa rèm kẹt, thay thanh treo, dây kéo & phụ kiện màn rèm cũ.",
                 IconName = "repair",
