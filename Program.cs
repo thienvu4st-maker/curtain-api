@@ -95,7 +95,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-// --- 5. Pure DDL Schema Migration (CREATE TABLE IF NOT EXISTS Only) ---
+// --- 5. Pure DDL Schema Migration & Clean Bad Heyzine Links ---
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -156,6 +156,9 @@ using (var scope = app.Services.CreateScope())
         -- 5. Guarantee Columns exist
         ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""CategoryGroupId"" integer NULL;
         ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" integer NULL;
+
+        -- 6. Clean legacy broken Heyzine links from ECatalogs table
+        DELETE FROM ""ECatalogs"" WHERE ""PdfUrl"" LIKE '%heyzine%';
     ";
 
     try
